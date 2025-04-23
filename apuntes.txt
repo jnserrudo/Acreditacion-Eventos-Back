@@ -1,0 +1,7 @@
+Entendiendo el Modelo Actual:
+Event: Representa el evento en sí (nombre, fecha, etc.).
+Participant: No representa a una "Persona" genérica, sino la participación o inscripción de una
+ persona en un evento específico. Por eso tiene campos como eventId, name, lastName, dni, entryNumber,
+  accredited, etc. Cada fila en la tabla Participant es un registro de "Esta persona 
+  (con este DNI/Nombre) está asociada a ESTE evento (eventId) con ESTE número de entrada y ESTE 
+  estado de acreditación".

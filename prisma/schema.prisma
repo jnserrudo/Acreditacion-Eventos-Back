@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+// --- Modelo para Eventos (en Español) ---
+model Evento {
+  id          Int       @id @default(autoincrement())
+  nombre      String    // Nombre del evento
+  fecha       DateTime? @db.Date // Fecha del evento (Opcional)
+  lugar       String?   // Lugar del evento (Opcional)
+  descripcion String?   @db.Text // Descripción (Opcional)
+  createdAt   DateTime  @default(now()) @map("createdAt") // Mapeado a createdAt en DB
+  updatedAt   DateTime  @updatedAt @map("updatedAt") // Mapeado a updatedAt en DB
+
+  // Relación: Un evento tiene muchos participantes
+  participantes Participante[]
+
+  // Mapeo explícito al nombre de la tabla en la BD (buenas práctica)
+  @@map("Eventos")
+}
+
+// --- Modelo para Participantes (en Español) ---
+model Participante {
+  id            Int       @id @default(autoincrement())
+  eventoId      Int       // Clave foránea al evento
+
+  // Datos de la persona
+  nombre        String    @db.VarChar(150)
+  apellido      String    @db.VarChar(150)
+  dni           String    @db.VarChar(20)
+  numeroEntrada String    @db.VarChar(50) @map("numero_entrada") // Mapeado explícito
+  telefono      String?   @db.VarChar(30)
+  correo        String?   @unique // Correo único si se provee
+
+  // --- NUEVOS CAMPOS (como String y en Español) ---
+  medioPago     String?   @db.VarChar(50) @map("medio_pago") // Medio de pago (Opcional, String)
+  rubro         String?   @db.VarChar(100) // Rubro (Opcional, String)
+  // --- FIN NUEVOS CAMPOS ---
+
+  // Estado de acreditación
+  acreditado    Boolean   @default(false)
+
+  createdAt   DateTime  @default(now()) @map("createdAt")
+  updatedAt   DateTime  @updatedAt @map("updatedAt")
+
+  // Relación: Un participante pertenece a un evento
+  evento        Evento    @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  // Constraints únicos por evento
+  @@unique([eventoId, dni], name: "participante_unico_dni_por_evento")
+  @@unique([eventoId, numeroEntrada], name: "participante_unico_entrada_por_evento")
+
+  // Índices para búsquedas
+  @@index([dni])
+  @@index([numeroEntrada])
+  @@index([eventoId])
+
+  // Mapeo explícito al nombre de la tabla
+  @@map("Participantes")
+}
