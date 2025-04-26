@@ -4,6 +4,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { router as apiRouter } from './src/routes/main.js' // Importa el enrutador principal
 
+
+import http from 'http'; // Importa módulo http nativo
+import { Server } from 'socket.io'; // Importa Server de socket.io
+
+
 // import { PrismaClient } from '@prisma/client'; // <- LÍNEA ANTIGUA
 
 // Al principio de eventoModel.js y participanteModel.js
@@ -15,6 +20,10 @@ dotenv.config(); // Carga variables de .env
 const app = express();
 app.disable('x-powered-by'); // Buena práctica de seguridad
 
+
+const server = http.createServer(app); // Crea servidor HTTP usando Express app
+
+
 // --- Configuración CORS ---
 // Define aquí los orígenes permitidos para tu frontend
 const ACCEPTED_ORIGINS = [
@@ -24,21 +33,38 @@ const ACCEPTED_ORIGINS = [
     // Añade otros orígenes si es necesario
 ];
 
-app.use(cors({
+const corsOptions = {
     origin: (origin, callback) => {
-        // Permite solicitudes sin origen (ej. Postman, apps móviles, curl) Y orígenes aceptados
         if (!origin || ACCEPTED_ORIGINS.includes(origin)) {
-            return callback(null, true);
+            callback(null, true);
         } else {
-            console.warn(`Origen no permitido por CORS: ${origin}`);
-            return callback(new Error('No permitido por CORS'));
+            callback(new Error('No permitido por CORS'));
         }
     },
-    credentials: true // Permite cookies si las usaras en el futuro
-}));
+    credentials: true
+};
+
+app.use(cors(corsOptions)); // Aplica CORS a Express
+
+// Configura Socket.IO con CORS
+const io = new Server(server, {
+    cors: corsOptions // Reutiliza las mismas opciones de CORS
+});
+
 
 // --- Middleware ---
 app.use(json()); // Middleware para parsear JSON bodies
+
+
+
+// --- Middleware para añadir io a cada request ---
+app.use((req, res, next) => {
+    req.io = io; // Adjunta la instancia io al objeto request
+    next(); // Continúa con el siguiente middleware o ruta
+});
+// ----------------------------------------------
+
+
 
 // --- Rutas Principales ---
 app.use('/api', apiRouter); // Monta el enrutador principal bajo /api
@@ -73,12 +99,53 @@ app.use((req, res) => {
 });
 
 
+
+
+// --- Lógica de Socket.IO ---
+io.on('connection', (socket) => {
+    console.log('🟢 Un cliente se ha conectado:', socket.id);
+
+    // Escuchar evento para unirse a una sala de evento específico
+    socket.on('join_event_room', (eventoId) => {
+        const roomName = `event_${eventoId}`;
+        socket.join(roomName);
+        console.log(`Cliente ${socket.id} se unió a la sala ${roomName}`);
+    });
+
+    // Escuchar evento para salir de una sala (al desmontar componente)
+    socket.on('leave_event_room', (eventoId) => {
+         const roomName = `event_${eventoId}`;
+         socket.leave(roomName);
+         console.log(`Cliente ${socket.id} salió de la sala ${roomName}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('🔴 Cliente desconectado:', socket.id);
+        // Socket.IO maneja la salida de salas automáticamente al desconectar
+    });
+});
+// --------------------------
+
+
+
+
+
+
 // --- Puerto y Arranque del Servidor ---
 const PORT = process.env.PORT ?? 3001; // Usa el puerto de Render o 3001 localmente
 
+/* 
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
+}); */
+
+
+// ¡IMPORTANTE! Usa server.listen en lugar de app.listen
+server.listen(PORT, () => {
+    console.log(`Servidor (HTTP + WebSocket) escuchando en http://localhost:${PORT}`);
 });
+
+
 
 // --- Cierre Adecuado --- (Opcional pero bueno para producción)
 const gracefulShutdown = async (signal) => {

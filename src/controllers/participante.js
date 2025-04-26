@@ -19,10 +19,14 @@ export class ParticipanteController {
   static create = async (req, res, next) => {
     try {
       const { eventoId } = req.params;
+
       const participanteData = {
         ...req.body,
         eventoId: parseInt(eventoId), // Asegura que el eventoId esté y sea número
       };
+
+      const io = req.io; // Asume que usas el middleware para pasar io
+
 
       // Aquí validación de participanteData (nombre, apellido, dni, numeroEntrada obligatorios)
 
@@ -44,6 +48,19 @@ export class ParticipanteController {
       const nuevoParticipante = await ParticipanteModel.create(
         participanteData
       );
+
+      // --- EMITIR EVENTO WEBSOCKET ---
+      // 1. Determina la sala correcta (basado en el eventoId del participante creado)
+      const roomName = `event_${participanteData.eventoId}`;
+
+      // 2. Emite el evento 'participant_created' a esa sala
+      //    Enviando el objeto completo del participante creado
+      io.to(roomName).emit('participant_created', nuevoParticipante);
+
+      // 3. Loguea para verificar (opcional)
+      console.log(`Emitido evento 'participant_created' a sala ${roomName} para participante ID ${nuevoParticipante.id}`);
+      // -------------------------------
+
       res.status(201).json(nuevoParticipante);
     } catch (error) {
       // --- MANEJO DE ERRORES MEJORADO ---
@@ -96,22 +113,42 @@ export class ParticipanteController {
   };
 
   // --- ACREDITACIÓN ---
+  // --- ACREDITACIÓN (Modificado) ---
   static acreditar = async (req, res, next) => {
+    const { id } = req.params; // ID del participante
+    const io = req.io; // <-- Obtén la instancia io del request
+
     try {
-      const { id } = req.params; // ID del participante
       const participanteAcreditado = await ParticipanteModel.acreditar(
         parseInt(id)
       );
 
       if (participanteAcreditado) {
+        // --- EMITIR EVENTO WEBSOCKET ---
+        // 1. Determina la sala correcta (basado en el eventoId del participante actualizado)
+        const roomName = `event_${participanteAcreditado.eventoId}`;
+
+        // 2. Emite el evento 'participant_updated' a esa sala
+        //    Enviando el objeto completo del participante actualizado
+        io.to(roomName).emit("participant_updated", participanteAcreditado);
+
+        // 3. Loguea para verificar (opcional)
+        console.log(
+          `Emitido evento 'participant_updated' a sala ${roomName} para participante ID ${id}`
+        );
+        // -------------------------------
+
+        // 4. Responde al cliente original que hizo la petición PUT
         res.json(participanteAcreditado);
       } else {
-        // Prisma lanzará P2025 si no lo encuentra
+        // El modelo ahora lanza error si no encuentra, este else no se alcanzaría
+        // Mantenemos por si acaso, pero el catch lo manejará mejor
         res
           .status(404)
           .json({ message: `Participante con ID ${id} no encontrado.` });
       }
     } catch (error) {
+      // Manejo de error P2025 (Not Found) de Prisma
       if (error.code === "P2025") {
         return res
           .status(404)
@@ -119,6 +156,7 @@ export class ParticipanteController {
             message: `Participante con ID ${req.params.id} no encontrado.`,
           });
       }
+      // Pasa otros errores al manejador global
       next(error);
     }
   };

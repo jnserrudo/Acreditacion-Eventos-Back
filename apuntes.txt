@@ -5,3 +5,13 @@ Participant: No representa a una "Persona" genérica, sino la participación o i
   accredited, etc. Cada fila en la tabla Participant es un registro de "Esta persona 
   (con este DNI/Nombre) está asociada a ESTE evento (eventId) con ESTE número de entrada y ESTE 
   estado de acreditación".
+
+
+
+
+Creamos un servidor HTTP (server) explícitamente usando http.createServer(app).
+Le decimos a este server que use nuestra lógica Express (app) para manejar peticiones HTTP normales.
+Adjuntamos el servidor Socket.IO (io) a este mismo server HTTP para que pueda manejar conexiones WebSocket.
+Hacemos que el server HTTP (que ahora maneja ambos tipos de tráfico) escuche en el puerto deseado usando server.listen().
+Los middlewares y rutas de Express (app.use) siguen configurándose en la instancia app, porque server delega el manejo HTTP a app.
+Es un patrón estándar para combinar Express y Socket.IO en la misma aplicación y puerto. ¡Espero que esto aclare la confusión!
