@@ -37,7 +37,7 @@ export class ParticipanteController {
         !participanteData.dni ||
         !participanteData.numeroEntrada ||
         !participanteData.telefono ||
-        !participanteData.correo ||
+        
         !participanteData.medioPago ||
         !participanteData.rubro
       ) {
