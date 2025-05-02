@@ -15,3 +15,6 @@ Adjuntamos el servidor Socket.IO (io) a este mismo server HTTP para que pueda ma
 Hacemos que el server HTTP (que ahora maneja ambos tipos de tráfico) escuche en el puerto deseado usando server.listen().
 Los middlewares y rutas de Express (app.use) siguen configurándose en la instancia app, porque server delega el manejo HTTP a app.
 Es un patrón estándar para combinar Express y Socket.IO en la misma aplicación y puerto. ¡Espero que esto aclare la confusión!
+
+
+

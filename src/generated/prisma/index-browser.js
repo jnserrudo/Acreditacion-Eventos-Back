@@ -138,6 +138,9 @@ exports.Prisma.ParticipanteScalarFieldEnum = {
   correo: 'correo',
   medioPago: 'medioPago',
   rubro: 'rubro',
+  montoPagado: 'montoPagado',
+  precioEntrada: 'precioEntrada',
+  nuevaEntrada: 'nuevaEntrada',
   acreditado: 'acreditado',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -167,7 +170,8 @@ exports.Prisma.ParticipanteOrderByRelevanceFieldEnum = {
   telefono: 'telefono',
   correo: 'correo',
   medioPago: 'medioPago',
-  rubro: 'rubro'
+  rubro: 'rubro',
+  nuevaEntrada: 'nuevaEntrada'
 };
 
 

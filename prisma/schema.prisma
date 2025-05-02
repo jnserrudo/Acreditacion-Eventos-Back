@@ -50,6 +50,21 @@ model Participante {
   rubro         String?   @db.VarChar(100) // Rubro (Opcional, String)
   // --- FIN NUEVOS CAMPOS ---
 
+
+
+ // --- NUEVOS CAMPOS DE PAGO ---
+  montoPagado   Decimal?  @db.Decimal(10, 2) @default(0) @map("monto_pagado") // Decimal para dinero (10 dígitos total, 2 decimales). Opcional inicialmente? O default 0?
+  // --- FIN NUEVOS CAMPOS DE PAGO ---
+
+
+  precioEntrada Decimal?   @db.Decimal(10, 2) @map("precio_entrada") // <- NUEVO CAMPO (Obligatorio)
+
+
+  // --- NUEVO CAMPO PARA ENTRADA REASIGNADA ---
+  nuevaEntrada  String?   @db.VarChar(50) @map("nueva_entrada") // String opcional para la nueva entrada
+  // --- FIN NUEVO CAMPO ENTRADA ---
+
+
   // Estado de acreditación
   acreditado    Boolean   @default(false)
 
@@ -67,6 +82,11 @@ model Participante {
   @@index([dni])
   @@index([numeroEntrada])
   @@index([eventoId])
+
+  @@index([nuevaEntrada]) // Indexar nueva entrada si se busca por ella
+
+  @@index([precioEntrada]) // Indexar precio si se filtra/ordena por él
+  @@index([montoPagado])   // Indexar monto si se filtra/ordena por él
 
   // Mapeo explícito al nombre de la tabla
   @@map("Participantes")

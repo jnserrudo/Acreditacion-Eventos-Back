@@ -28,6 +28,7 @@ const server = http.createServer(app); // Crea servidor HTTP usando Express app
 // Define aquí los orígenes permitidos para tu frontend
 const ACCEPTED_ORIGINS = [
     'http://localhost:5173', // Puerto común de Vite/React en desarrollo
+    'http://localhost:5174', // Puerto común de Vite/React en desarrollo
     'http://localhost:3000', // Puerto común de Create React App
     'https://acreditacion-eventos.onrender.com', // ¡IMPORTANTE! Añade la URL de tu frontend desplegado
     // Añade otros orígenes si es necesario

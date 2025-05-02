@@ -27,7 +27,6 @@ export class ParticipanteController {
 
       const io = req.io; // Asume que usas el middleware para pasar io
 
-
       // Aquí validación de participanteData (nombre, apellido, dni, numeroEntrada obligatorios)
 
       // --- Validación (como la tenías) ---
@@ -37,12 +36,40 @@ export class ParticipanteController {
         !participanteData.dni ||
         !participanteData.numeroEntrada ||
         !participanteData.telefono ||
-        
         !participanteData.medioPago ||
         !participanteData.rubro
       ) {
         // Ajusta según los campos *realmente* obligatorios ahora
         return res.status(400).json({ message: "Faltan campos obligatorios." });
+      }
+
+      // precioEntrada puede ser null si es opcional en el schema, pero si viene, debe ser número
+      if (
+        participanteData.precioEntrada !== null &&
+        participanteData.precioEntrada !== undefined &&
+        isNaN(parseFloat(participanteData.precioEntrada))
+      ) {
+        return res
+          .status(400)
+          .json({
+            message: "El 'precioEntrada' debe ser un número válido o nulo.",
+          });
+      }
+      // Validar que precioEntrada no sea negativo si viene
+      if (
+        participanteData.precioEntrada !== null &&
+        participanteData.precioEntrada !== undefined &&
+        parseFloat(participanteData.precioEntrada) < 0
+      ) {
+        return res
+          .status(400)
+          .json({ message: "El 'precioEntrada' no puede ser negativo." });
+      }
+      // Validar que montoPagado no sea negativo
+      if (parseFloat(participanteData.montoPagado) < 0) {
+        return res
+          .status(400)
+          .json({ message: "El 'montoPagado' no puede ser negativo." });
       }
 
       const nuevoParticipante = await ParticipanteModel.create(
@@ -55,10 +82,12 @@ export class ParticipanteController {
 
       // 2. Emite el evento 'participant_created' a esa sala
       //    Enviando el objeto completo del participante creado
-      io.to(roomName).emit('participant_created', nuevoParticipante);
+      io.to(roomName).emit("participant_created", nuevoParticipante);
 
       // 3. Loguea para verificar (opcional)
-      console.log(`Emitido evento 'participant_created' a sala ${roomName} para participante ID ${nuevoParticipante.id}`);
+      console.log(
+        `Emitido evento 'participant_created' a sala ${roomName} para participante ID ${nuevoParticipante.id}`
+      );
       // -------------------------------
 
       res.status(201).json(nuevoParticipante);
@@ -150,13 +179,124 @@ export class ParticipanteController {
     } catch (error) {
       // Manejo de error P2025 (Not Found) de Prisma
       if (error.code === "P2025") {
-        return res
-          .status(404)
-          .json({
-            message: `Participante con ID ${req.params.id} no encontrado.`,
-          });
+        return res.status(404).json({
+          message: `Participante con ID ${req.params.id} no encontrado.`,
+        });
       }
       // Pasa otros errores al manejador global
+      next(error);
+    }
+  };
+
+
+    // --- CONTROLADOR PARA CANCELAR SALDO (llama al método renombrado del modelo) ---
+    static cancelPendingAmount = async (req, res, next) => {
+      const { id } = req.params;
+      const io = req.io;
+      try {
+          // Llama al método correcto del modelo
+          const participanteActualizado = await ParticipanteModel.cancelPendingAmount(parseInt(id));
+
+          if (io) {
+              const roomName = `event_${participanteActualizado.eventoId}`;
+              io.to(roomName).emit('participant_updated', participanteActualizado);
+              console.log(`Emitido 'participant_updated' (saldo cancelado) a sala ${roomName} ID ${id}`);
+          }
+          res.json(participanteActualizado);
+
+      } catch (error) {
+          if (error.code === 'P2025') { return res.status(404).json({ message: `Participante no encontrado.` }); }
+          // Captura el error específico del modelo si no se puede cancelar
+          if (error.message === "No se puede cancelar saldo: Asigne primero el 'Precio de Entrada' a este participante.") {
+               return res.status(400).json({ message: error.message });
+          }
+           if (error.message === "El participante ya ha pagado el monto total o más.") {
+               return res.status(409).json({ message: error.message }); // Conflict si ya estaba pago
+          }
+          next(error);
+      }
+  };
+
+  // --- CONTROLADOR PARA ACTUALIZAR PRECIO ENTRADA ---
+   static updatePrecioEntrada = async (req, res, next) => {
+        const { id } = req.params;
+        const { precioEntrada } = req.body; // Espera el nuevo precio
+        const io = req.io;
+
+        try {
+              // La validación principal está en el modelo
+              const participanteActualizado = await ParticipanteModel.updatePrecioEntrada(parseInt(id), precioEntrada);
+
+              if(io){
+                  const roomName = `event_${participanteActualizado.eventoId}`;
+                  io.to(roomName).emit('participant_updated', participanteActualizado);
+                  console.log(`Emitido 'participant_updated' (precio entrada) a sala ${roomName} ID ${id}`);
+              }
+              res.json(participanteActualizado);
+
+        } catch (error) {
+             if (error.code === 'P2025') { return res.status(404).json({ message: `Participante no encontrado.` }); }
+             // Captura errores de formato/valor del modelo
+             if (error.message?.includes("Precio de Entrada")) {
+                  return res.status(400).json({ message: error.message });
+             }
+            next(error);
+        }
+   };
+
+   
+  // --- NUEVO: Controlador para Asignar Nueva Entrada ---
+  static assignNuevaEntrada = async (req, res, next) => {
+    const { id } = req.params; // ID del participante
+    const { nuevaEntrada } = req.body; // El nuevo número de entrada
+    const io = req.io;
+
+    if (
+      !nuevaEntrada ||
+      typeof nuevaEntrada !== "string" ||
+      !nuevaEntrada.trim()
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Se requiere el campo 'nuevaEntrada' y no puede estar vacío.",
+        });
+    }
+
+    try {
+      const participanteActualizado =
+        await ParticipanteModel.assignNuevaEntrada(parseInt(id), nuevaEntrada);
+
+      // Emitir evento de actualización general
+      const roomName = `event_${participanteActualizado.eventoId}`;
+      io.to(roomName).emit("participant_updated", participanteActualizado);
+      console.log(
+        `Emitido evento 'participant_updated' (nueva entrada) a sala ${roomName} para ID ${id}`
+      );
+
+      res.json(participanteActualizado);
+    } catch (error) {
+      if (error.code === "P2025") {
+        return res
+          .status(404)
+          .json({ message: `Participante con ID ${id} no encontrado.` });
+      }
+      // Manejar P2002 si descomentaste el constraint unique para nuevaEntrada
+      if (
+        error.code === "P2002" &&
+        error.meta?.target?.includes("nuevaEntrada")
+      ) {
+        return res
+          .status(409)
+          .json({
+            message: `La nueva entrada '${nuevaEntrada}' ya está asignada a otro participante en este evento.`,
+          });
+      }
+      // Manejar error específico del modelo si la entrada ya estaba asignada (si implementaste esa lógica)
+      if (error.message?.includes("ya está asignada")) {
+        return res.status(409).json({ message: error.message });
+      }
       next(error);
     }
   };
