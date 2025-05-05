@@ -2025,6 +2025,7 @@ export namespace Prisma {
     montoPagado: Decimal | null
     precioEntrada: Decimal | null
     nuevaEntrada: string | null
+    medioPagoCancelacion: string | null
     acreditado: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2044,6 +2045,7 @@ export namespace Prisma {
     montoPagado: Decimal | null
     precioEntrada: Decimal | null
     nuevaEntrada: string | null
+    medioPagoCancelacion: string | null
     acreditado: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2063,6 +2065,7 @@ export namespace Prisma {
     montoPagado: number
     precioEntrada: number
     nuevaEntrada: number
+    medioPagoCancelacion: number
     acreditado: number
     createdAt: number
     updatedAt: number
@@ -2098,6 +2101,7 @@ export namespace Prisma {
     montoPagado?: true
     precioEntrada?: true
     nuevaEntrada?: true
+    medioPagoCancelacion?: true
     acreditado?: true
     createdAt?: true
     updatedAt?: true
@@ -2117,6 +2121,7 @@ export namespace Prisma {
     montoPagado?: true
     precioEntrada?: true
     nuevaEntrada?: true
+    medioPagoCancelacion?: true
     acreditado?: true
     createdAt?: true
     updatedAt?: true
@@ -2136,6 +2141,7 @@ export namespace Prisma {
     montoPagado?: true
     precioEntrada?: true
     nuevaEntrada?: true
+    medioPagoCancelacion?: true
     acreditado?: true
     createdAt?: true
     updatedAt?: true
@@ -2242,6 +2248,7 @@ export namespace Prisma {
     montoPagado: Decimal | null
     precioEntrada: Decimal | null
     nuevaEntrada: string | null
+    medioPagoCancelacion: string | null
     acreditado: boolean
     createdAt: Date
     updatedAt: Date
@@ -2280,6 +2287,7 @@ export namespace Prisma {
     montoPagado?: boolean
     precioEntrada?: boolean
     nuevaEntrada?: boolean
+    medioPagoCancelacion?: boolean
     acreditado?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2302,12 +2310,13 @@ export namespace Prisma {
     montoPagado?: boolean
     precioEntrada?: boolean
     nuevaEntrada?: boolean
+    medioPagoCancelacion?: boolean
     acreditado?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ParticipanteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventoId" | "nombre" | "apellido" | "dni" | "numeroEntrada" | "telefono" | "correo" | "medioPago" | "rubro" | "montoPagado" | "precioEntrada" | "nuevaEntrada" | "acreditado" | "createdAt" | "updatedAt", ExtArgs["result"]["participante"]>
+  export type ParticipanteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventoId" | "nombre" | "apellido" | "dni" | "numeroEntrada" | "telefono" | "correo" | "medioPago" | "rubro" | "montoPagado" | "precioEntrada" | "nuevaEntrada" | "medioPagoCancelacion" | "acreditado" | "createdAt" | "updatedAt", ExtArgs["result"]["participante"]>
   export type ParticipanteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     evento?: boolean | EventoDefaultArgs<ExtArgs>
   }
@@ -2331,6 +2340,7 @@ export namespace Prisma {
       montoPagado: Prisma.Decimal | null
       precioEntrada: Prisma.Decimal | null
       nuevaEntrada: string | null
+      medioPagoCancelacion: string | null
       acreditado: boolean
       createdAt: Date
       updatedAt: Date
@@ -2717,6 +2727,7 @@ export namespace Prisma {
     readonly montoPagado: FieldRef<"Participante", 'Decimal'>
     readonly precioEntrada: FieldRef<"Participante", 'Decimal'>
     readonly nuevaEntrada: FieldRef<"Participante", 'String'>
+    readonly medioPagoCancelacion: FieldRef<"Participante", 'String'>
     readonly acreditado: FieldRef<"Participante", 'Boolean'>
     readonly createdAt: FieldRef<"Participante", 'DateTime'>
     readonly updatedAt: FieldRef<"Participante", 'DateTime'>
@@ -3122,6 +3133,7 @@ export namespace Prisma {
     montoPagado: 'montoPagado',
     precioEntrada: 'precioEntrada',
     nuevaEntrada: 'nuevaEntrada',
+    medioPagoCancelacion: 'medioPagoCancelacion',
     acreditado: 'acreditado',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -3164,7 +3176,8 @@ export namespace Prisma {
     correo: 'correo',
     medioPago: 'medioPago',
     rubro: 'rubro',
-    nuevaEntrada: 'nuevaEntrada'
+    nuevaEntrada: 'nuevaEntrada',
+    medioPagoCancelacion: 'medioPagoCancelacion'
   };
 
   export type ParticipanteOrderByRelevanceFieldEnum = (typeof ParticipanteOrderByRelevanceFieldEnum)[keyof typeof ParticipanteOrderByRelevanceFieldEnum]
@@ -3305,6 +3318,7 @@ export namespace Prisma {
     montoPagado?: DecimalNullableFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: DecimalNullableFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: StringNullableFilter<"Participante"> | string | null
+    medioPagoCancelacion?: StringNullableFilter<"Participante"> | string | null
     acreditado?: BoolFilter<"Participante"> | boolean
     createdAt?: DateTimeFilter<"Participante"> | Date | string
     updatedAt?: DateTimeFilter<"Participante"> | Date | string
@@ -3325,6 +3339,7 @@ export namespace Prisma {
     montoPagado?: SortOrderInput | SortOrder
     precioEntrada?: SortOrderInput | SortOrder
     nuevaEntrada?: SortOrderInput | SortOrder
+    medioPagoCancelacion?: SortOrderInput | SortOrder
     acreditado?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -3351,6 +3366,7 @@ export namespace Prisma {
     montoPagado?: DecimalNullableFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: DecimalNullableFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: StringNullableFilter<"Participante"> | string | null
+    medioPagoCancelacion?: StringNullableFilter<"Participante"> | string | null
     acreditado?: BoolFilter<"Participante"> | boolean
     createdAt?: DateTimeFilter<"Participante"> | Date | string
     updatedAt?: DateTimeFilter<"Participante"> | Date | string
@@ -3371,6 +3387,7 @@ export namespace Prisma {
     montoPagado?: SortOrderInput | SortOrder
     precioEntrada?: SortOrderInput | SortOrder
     nuevaEntrada?: SortOrderInput | SortOrder
+    medioPagoCancelacion?: SortOrderInput | SortOrder
     acreditado?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -3398,6 +3415,7 @@ export namespace Prisma {
     montoPagado?: DecimalNullableWithAggregatesFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: DecimalNullableWithAggregatesFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: StringNullableWithAggregatesFilter<"Participante"> | string | null
+    medioPagoCancelacion?: StringNullableWithAggregatesFilter<"Participante"> | string | null
     acreditado?: BoolWithAggregatesFilter<"Participante"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Participante"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Participante"> | Date | string
@@ -3486,6 +3504,7 @@ export namespace Prisma {
     montoPagado?: Decimal | DecimalJsLike | number | string | null
     precioEntrada?: Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: string | null
+    medioPagoCancelacion?: string | null
     acreditado?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3506,6 +3525,7 @@ export namespace Prisma {
     montoPagado?: Decimal | DecimalJsLike | number | string | null
     precioEntrada?: Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: string | null
+    medioPagoCancelacion?: string | null
     acreditado?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3523,6 +3543,7 @@ export namespace Prisma {
     montoPagado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: NullableStringFieldUpdateOperationsInput | string | null
+    medioPagoCancelacion?: NullableStringFieldUpdateOperationsInput | string | null
     acreditado?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3543,6 +3564,7 @@ export namespace Prisma {
     montoPagado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: NullableStringFieldUpdateOperationsInput | string | null
+    medioPagoCancelacion?: NullableStringFieldUpdateOperationsInput | string | null
     acreditado?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3562,6 +3584,7 @@ export namespace Prisma {
     montoPagado?: Decimal | DecimalJsLike | number | string | null
     precioEntrada?: Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: string | null
+    medioPagoCancelacion?: string | null
     acreditado?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3579,6 +3602,7 @@ export namespace Prisma {
     montoPagado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: NullableStringFieldUpdateOperationsInput | string | null
+    medioPagoCancelacion?: NullableStringFieldUpdateOperationsInput | string | null
     acreditado?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3598,6 +3622,7 @@ export namespace Prisma {
     montoPagado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: NullableStringFieldUpdateOperationsInput | string | null
+    medioPagoCancelacion?: NullableStringFieldUpdateOperationsInput | string | null
     acreditado?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3856,6 +3881,7 @@ export namespace Prisma {
     montoPagado?: SortOrder
     precioEntrada?: SortOrder
     nuevaEntrada?: SortOrder
+    medioPagoCancelacion?: SortOrder
     acreditado?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -3882,6 +3908,7 @@ export namespace Prisma {
     montoPagado?: SortOrder
     precioEntrada?: SortOrder
     nuevaEntrada?: SortOrder
+    medioPagoCancelacion?: SortOrder
     acreditado?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -3901,6 +3928,7 @@ export namespace Prisma {
     montoPagado?: SortOrder
     precioEntrada?: SortOrder
     nuevaEntrada?: SortOrder
+    medioPagoCancelacion?: SortOrder
     acreditado?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4246,6 +4274,7 @@ export namespace Prisma {
     montoPagado?: Decimal | DecimalJsLike | number | string | null
     precioEntrada?: Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: string | null
+    medioPagoCancelacion?: string | null
     acreditado?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4264,6 +4293,7 @@ export namespace Prisma {
     montoPagado?: Decimal | DecimalJsLike | number | string | null
     precioEntrada?: Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: string | null
+    medioPagoCancelacion?: string | null
     acreditado?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4312,6 +4342,7 @@ export namespace Prisma {
     montoPagado?: DecimalNullableFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: DecimalNullableFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: StringNullableFilter<"Participante"> | string | null
+    medioPagoCancelacion?: StringNullableFilter<"Participante"> | string | null
     acreditado?: BoolFilter<"Participante"> | boolean
     createdAt?: DateTimeFilter<"Participante"> | Date | string
     updatedAt?: DateTimeFilter<"Participante"> | Date | string
@@ -4384,6 +4415,7 @@ export namespace Prisma {
     montoPagado?: Decimal | DecimalJsLike | number | string | null
     precioEntrada?: Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: string | null
+    medioPagoCancelacion?: string | null
     acreditado?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4401,6 +4433,7 @@ export namespace Prisma {
     montoPagado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: NullableStringFieldUpdateOperationsInput | string | null
+    medioPagoCancelacion?: NullableStringFieldUpdateOperationsInput | string | null
     acreditado?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4419,6 +4452,7 @@ export namespace Prisma {
     montoPagado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: NullableStringFieldUpdateOperationsInput | string | null
+    medioPagoCancelacion?: NullableStringFieldUpdateOperationsInput | string | null
     acreditado?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4437,6 +4471,7 @@ export namespace Prisma {
     montoPagado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     precioEntrada?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     nuevaEntrada?: NullableStringFieldUpdateOperationsInput | string | null
+    medioPagoCancelacion?: NullableStringFieldUpdateOperationsInput | string | null
     acreditado?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

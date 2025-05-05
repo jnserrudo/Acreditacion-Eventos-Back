@@ -12,6 +12,7 @@ const formatParticipant = (participant) => {
     // Asegura que montoPagado y precioEntrada sean strings o null
     montoPagado: participant.montoPagado?.toString() ?? "0.00", // Si es null, devuelve '0.00' (ya que tiene default)
     precioEntrada: participant.precioEntrada?.toString() ?? null, // Devuelve null si es null en DB
+    medioPagoCancelacion: participant.medioPagoCancelacion ?? null, // <-- Añadir formateo
   };
 };
 
@@ -158,51 +159,52 @@ export class ParticipanteModel {
   };
 
   // --- NUEVO: Actualizar Monto Pagado (Cancelar Saldo) ---
-  static cancelPendingAmount = async (id) => { // <--- Renombrada y ya no necesita montoFinal
+  static cancelPendingAmount = async (id, medioPagoDeCancelacion) => {
+    // <--- Renombrada y ya no necesita montoFinal
     if (isNaN(id)) return null; // O lanzar error
+    if (
+      !medioPagoDeCancelacion ||
+      typeof medioPagoDeCancelacion !== "string" ||
+      !medioPagoDeCancelacion.trim()
+    ) {
+      throw new Error(
+        "Se requiere el medio de pago utilizado para la cancelación."
+      );
+    }
+
     try {
-      // 1. Obtener participante para saber su precioEntrada
       const participante = await prisma.participante.findUnique({
         where: { id: id },
-        select: {
-          precioEntrada: true,
-          montoPagado: true,
-          id: true,
-          eventoId: true,
-        }, // Selecciona campos necesarios
+        select: { precioEntrada: true, montoPagado: true, acreditado: true }, // Incluir acreditado
       });
 
       if (!participante) {
-        const error = new Error(`P2025`);
-        throw error;
+        const e = new Error(`P2025`);
+        throw e;
       }
-
-      // 2. VERIFICAR SI TIENE PRECIO ASIGNADO
+      if (participante.acreditado) {
+        const e = new Error("No se puede modificar pago (ya acreditado).");
+        e.status = 409;
+        throw e;
+      }
       if (participante.precioEntrada === null) {
-        throw new Error(
-          "No se puede cancelar saldo: Asigne primero el 'Precio de Entrada' a este participante."
-        );
+        throw new Error("Asigne primero el 'Precio de Entrada'.");
       }
-
-      // 3. Opcional: Verificar si ya está pagado (evita update innecesario)
       if (participante.montoPagado.gte(participante.precioEntrada)) {
-        // gte = greater than or equal
-        console.log(
-          `Participante ${id} ya tiene el pago completo o excedido. No se actualiza monto.`
-        );
-        // Devuelve el participante actual formateado sin hacer update
-        // Necesitamos volver a buscarlo para tener todos los campos para formatParticipant
-        const currentFullParticipant = await prisma.participante.findUnique({
+        console.log(`Participante ${id} ya pagado. No se actualiza.`);
+        const currentFull = await prisma.participante.findUnique({
           where: { id },
         });
-        return formatParticipant(currentFullParticipant);
+        return formatParticipant(currentFull);
       }
 
-      // 4. Actualizar montoPagado al precioEntrada definido
+      // Actualiza monto Y el NUEVO campo medioPagoCancelacion
       const participanteActualizado = await prisma.participante.update({
         where: { id: id },
         data: {
           montoPagado: participante.precioEntrada,
+          medioPagoCancelacion: medioPagoDeCancelacion.trim(), // <-- Guarda en el nuevo campo
+          // medioPago: NO SE TOCA
         },
       });
       return formatParticipant(participanteActualizado);
@@ -215,37 +217,42 @@ export class ParticipanteModel {
     }
   };
 
-// --- ACTUALIZAR PRECIO DE ENTRADA (Nuevo) ---
-static updatePrecioEntrada = async (id, nuevoPrecio) => {
+  // --- ACTUALIZAR PRECIO DE ENTRADA (Nuevo) ---
+  static updatePrecioEntrada = async (id, nuevoPrecio) => {
     if (isNaN(id)) return null; // O lanzar error
     let precioDecimal;
     try {
-        // Permitir null para quitar precio, 0 para gratis, o número positivo
-        if (nuevoPrecio === null || nuevoPrecio === undefined || nuevoPrecio === '') {
-            precioDecimal = null; // Permite quitar el precio
-        } else {
-            const precioNum = parseFloat(nuevoPrecio);
-            if (isNaN(precioNum) || precioNum < 0) {
-                 throw new Error("El 'Precio de Entrada' debe ser un número válido (0 o mayor) o nulo.");
-            }
-            precioDecimal = new Decimal(nuevoPrecio);
+      // Permitir null para quitar precio, 0 para gratis, o número positivo
+      if (
+        nuevoPrecio === null ||
+        nuevoPrecio === undefined ||
+        nuevoPrecio === ""
+      ) {
+        precioDecimal = null; // Permite quitar el precio
+      } else {
+        const precioNum = parseFloat(nuevoPrecio);
+        if (isNaN(precioNum) || precioNum < 0) {
+          throw new Error(
+            "El 'Precio de Entrada' debe ser un número válido (0 o mayor) o nulo."
+          );
         }
+        precioDecimal = new Decimal(nuevoPrecio);
+      }
     } catch (e) {
-        throw new Error("Formato de 'Precio de Entrada' inválido.");
+      throw new Error("Formato de 'Precio de Entrada' inválido.");
     }
 
     try {
-         const participanteActualizado = await prisma.participante.update({
-             where: { id: id },
-             data: { precioEntrada: precioDecimal } // Actualiza con Decimal o null
-         });
-         return formatParticipant(participanteActualizado);
+      const participanteActualizado = await prisma.participante.update({
+        where: { id: id },
+        data: { precioEntrada: precioDecimal }, // Actualiza con Decimal o null
+      });
+      return formatParticipant(participanteActualizado);
     } catch (error) {
-        console.error(`Error en updatePrecioEntrada (id: ${id}):`, error);
-        throw error; // Relanza P2025 etc.
+      console.error(`Error en updatePrecioEntrada (id: ${id}):`, error);
+      throw error; // Relanza P2025 etc.
     }
-};
-
+  };
 
   // --- NUEVO: Asignar Nueva Entrada ---
   static assignNuevaEntrada = async (id, nuevaEntradaValue) => {
@@ -278,7 +285,7 @@ static updatePrecioEntrada = async (id, nuevoPrecio) => {
           nuevaEntrada: nuevaEntradaValue.trim(),
         },
       });
-     return formatParticipant(participanteActualizado);
+      return formatParticipant(participanteActualizado);
     } catch (error) {
       console.error(
         `Error en ParticipanteModel.assignNuevaEntrada (id: ${id}):`,

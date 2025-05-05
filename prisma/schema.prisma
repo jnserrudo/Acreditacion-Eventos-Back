@@ -64,6 +64,9 @@ model Participante {
   nuevaEntrada  String?   @db.VarChar(50) @map("nueva_entrada") // String opcional para la nueva entrada
   // --- FIN NUEVO CAMPO ENTRADA ---
 
+  // --- NUEVO CAMPO: Medio de Pago de Cancelación ---
+  medioPagoCancelacion String? @db.VarChar(50) @map("medio_pago_cancelacion") // Opcional
+  // --- FIN ---
 
   // Estado de acreditación
   acreditado    Boolean   @default(false)

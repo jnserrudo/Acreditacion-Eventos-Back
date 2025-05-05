@@ -193,9 +193,16 @@ export class ParticipanteController {
     static cancelPendingAmount = async (req, res, next) => {
       const { id } = req.params;
       const io = req.io;
+      const { medioPagoCancelacion } = req.body; // <-- Nombre descriptivo
+
+ // --- VALIDAR EL CAMPO ESPECÍFICO ---
+ if (!medioPagoCancelacion || typeof medioPagoCancelacion !== 'string' || !medioPagoCancelacion.trim()) {
+  return res.status(400).json({ message: "Se requiere el 'medioPagoCancelacion' en el cuerpo de la petición." });
+}
+// ------------------------------------
       try {
           // Llama al método correcto del modelo
-          const participanteActualizado = await ParticipanteModel.cancelPendingAmount(parseInt(id));
+          const participanteActualizado = await ParticipanteModel.cancelPendingAmount(parseInt(id), medioPagoCancelacion);
 
           if (io) {
               const roomName = `event_${participanteActualizado.eventoId}`;
@@ -244,7 +251,7 @@ export class ParticipanteController {
         }
    };
 
-   
+
   // --- NUEVO: Controlador para Asignar Nueva Entrada ---
   static assignNuevaEntrada = async (req, res, next) => {
     const { id } = req.params; // ID del participante
