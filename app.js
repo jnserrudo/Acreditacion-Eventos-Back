@@ -73,7 +73,7 @@ app.use('/api', apiRouter); // Monta el enrutador principal bajo /api
 
 
 // --- NUEVA RUTA HEALTH CHECK ---
-app.get('/health', async (req, res, next) => {
+/* app.get('/health', async (req, res, next) => {
     try {
         // Intenta una operación muy rápida y ligera en la DB
         await prisma.$queryRaw`SELECT 1`; // Query estándar para verificar conexión
@@ -82,8 +82,16 @@ app.get('/health', async (req, res, next) => {
         console.error("Health check fallido (DB Error):", dbError);
         res.status(503).send('Service Unavailable (DB Error)'); // Error si la DB falla
     }
-});
+}); */
 // -----------------------------
+
+// --- HEALTH CHECK SIMPLIFICADO (SIN DB QUERY) ---
+app.get('/health', async (req, res, next) => {
+    // Simplemente responde que el servidor Express está vivo
+    res.status(200).send('OK - Service Alive');
+});
+// -----------------------------------------------
+
 
 // --- Ruta Base de Verificación ---
 app.get('/', (req, res) => {
