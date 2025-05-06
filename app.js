@@ -70,6 +70,21 @@ app.use((req, res, next) => {
 // --- Rutas Principales ---
 app.use('/api', apiRouter); // Monta el enrutador principal bajo /api
 
+
+
+// --- NUEVA RUTA HEALTH CHECK ---
+app.get('/health', async (req, res, next) => {
+    try {
+        // Intenta una operación muy rápida y ligera en la DB
+        await prisma.$queryRaw`SELECT 1`; // Query estándar para verificar conexión
+        res.status(200).send('OK'); // Responde OK si la DB contesta
+    } catch (dbError) {
+        console.error("Health check fallido (DB Error):", dbError);
+        res.status(503).send('Service Unavailable (DB Error)'); // Error si la DB falla
+    }
+});
+// -----------------------------
+
 // --- Ruta Base de Verificación ---
 app.get('/', (req, res) => {
   res.send('API de Acreditación Funcionando!');
