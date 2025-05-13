@@ -98,22 +98,52 @@ app.get('/', (req, res) => {
   res.send('API de Acreditación Funcionando!');
 });
 
-// --- Manejo de Errores Básico ---
-// Middleware para capturar errores de CORS específicamente
+// --- Manejo de Errores Global (MODIFICADO) ---
 app.use((err, req, res, next) => {
-    if (err && err.message === 'No permitido por CORS') {
-        console.error(err.message);
-        res.status(403).json({ message: 'Acceso denegado por política de CORS.' });
-    } else if (err) { // Captura otros errores pasados por next(err)
-        console.error("Error no manejado:", err);
-        // Evita exponer detalles del error en producción
-        const statusCode = err.status || 500;
-        const message = process.env.NODE_ENV !== 'production' ? err.message : 'Error interno del servidor.';
-        res.status(statusCode).json({ message });
-    } else {
-        // Si no hay error, pasa al siguiente middleware (podría ser un 404)
-        next();
+    console.error("Error no manejado detectado:", err); // Loguea el error completo para tu análisis
+
+    // Error de CORS (ya lo tenías)
+    if (err.message === 'No permitido por CORS') {
+        return res.status(403).json({ message: 'Acceso denegado por política de CORS.' });
     }
+
+    // --- Identificar errores de pool de Prisma o límite de conexión ---
+    // P2024: Timeout al obtener conexión del pool de Prisma
+    if (err.code === 'P2024') {
+        console.warn("Prisma P2024: Timeout obteniendo conexión del pool.");
+        return res.status(503).json({ // 503 Service Unavailable
+            message: 'El servidor está experimentando alta carga. Por favor, intente de nuevo en unos momentos.'
+        });
+    }
+
+    // Error específico de MySQL 1226 (max_user_connections)
+    // A veces Prisma lo envuelve, otras veces puede venir más directo.
+    // El mensaje del error que pegaste (PrismaClientUnknownRequestError) contenía el string 'ERROR 42000 (1226)'
+    if (err.message && err.message.includes('(1226)') && err.message.includes('max_user_connections')) {
+        console.warn("MySQL Error 1226: Límite de max_user_connections alcanzado.");
+        return res.status(503).json({ // 503 Service Unavailable
+            message: 'El servidor de base de datos está saturado. Por favor, intente de nuevo en unos momentos.'
+        });
+    }
+    // -----------------------------------------------------------------
+
+    // Otros errores de Prisma conocidos que podrían indicar sobrecarga o problemas temporales
+    // P1000: Authentication failed (poco probable aquí, pero por si acaso)
+    // P1001: Can't reach database server
+    // P1002: Database server reached but timed out
+    if (err.code === 'P1000' || err.code === 'P1001' || err.code === 'P1002') {
+        console.error(`Prisma DB Connection Error ${err.code}:`, err.message);
+         return res.status(503).json({ message: 'Problema de conexión con la base de datos. Intente más tarde.' });
+    }
+
+
+    // Error genérico
+    const statusCode = err.status || 500;
+    const responseMessage = (statusCode === 500 && process.env.NODE_ENV === 'production')
+        ? 'Ocurrió un error inesperado en el servidor.'
+        : err.message || 'Error interno del servidor.';
+
+    res.status(statusCode).json({ message: responseMessage });
 });
 
 // --- Manejo de Rutas No Encontradas (404) ---
