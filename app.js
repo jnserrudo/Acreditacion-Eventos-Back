@@ -30,26 +30,36 @@ const ACCEPTED_ORIGINS = [
     'http://localhost:5173', // Puerto común de Vite/React en desarrollo
     'http://localhost:5174', // Puerto común de Vite/React en desarrollo
     'http://localhost:3000', // Puerto común de Create React App
-    'https://acreditacion-eventos.onrender.com', // ¡IMPORTANTE! Añade la URL de tu frontend desplegado
-    // Añade otros orígenes si es necesario
+    'https://acreditacion-eventos.onrender.com', // URL de producción del frontend
+    'https://acreditacion-eventos-back.onrender.com' // Por si hay redirecciones
 ];
 
+// Configuración mejorada de CORS
 const corsOptions = {
     origin: (origin, callback) => {
-        if (!origin || ACCEPTED_ORIGINS.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('No permitido por CORS'));
+        // Permite peticiones sin origen (como aplicaciones móviles, curl, postman)
+        if (!origin) return callback(null, true);
+        
+        if (ACCEPTED_ORIGINS.includes(origin)) {
+            return callback(null, true);
         }
+        return callback(new Error('No permitido por CORS'), false);
     },
-    credentials: true
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,
+    optionsSuccessStatus: 200 // Algunos navegadores antiguos tienen problemas con 204
 };
 
 app.use(cors(corsOptions)); // Aplica CORS a Express
 
 // Configura Socket.IO con CORS
 const io = new Server(server, {
-    cors: corsOptions // Reutiliza las mismas opciones de CORS
+    cors: {
+        origin: ACCEPTED_ORIGINS,
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
 });
 
 
