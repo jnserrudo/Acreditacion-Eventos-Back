@@ -42,7 +42,7 @@ model Participante {
   dni           String  @db.VarChar(20)
   numeroEntrada String  @map("numero_entrada") @db.VarChar(50) // Mapeado explícito
   telefono      String? @db.VarChar(30)
-  correo        String? @unique // Correo único si se provee
+  correo        String? //@unique // Correo único si se provee
 
   // --- NUEVOS CAMPOS (como String y en Español) ---
   medioPago String? @map("medio_pago") @db.VarChar(50) // Medio de pago (Opcional, String)

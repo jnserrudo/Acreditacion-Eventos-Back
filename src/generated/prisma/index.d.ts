@@ -3349,7 +3349,6 @@ export namespace Prisma {
 
   export type ParticipanteWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    correo?: string
     participante_unico_dni_por_evento?: ParticipanteParticipante_unico_dni_por_eventoCompoundUniqueInput
     participante_unico_entrada_por_evento?: ParticipanteParticipante_unico_entrada_por_eventoCompoundUniqueInput
     AND?: ParticipanteWhereInput | ParticipanteWhereInput[]
@@ -3361,6 +3360,7 @@ export namespace Prisma {
     dni?: StringFilter<"Participante"> | string
     numeroEntrada?: StringFilter<"Participante"> | string
     telefono?: StringNullableFilter<"Participante"> | string | null
+    correo?: StringNullableFilter<"Participante"> | string | null
     medioPago?: StringNullableFilter<"Participante"> | string | null
     rubro?: StringNullableFilter<"Participante"> | string | null
     montoPagado?: DecimalNullableFilter<"Participante"> | Decimal | DecimalJsLike | number | string | null
@@ -3371,7 +3371,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Participante"> | Date | string
     updatedAt?: DateTimeFilter<"Participante"> | Date | string
     evento?: XOR<EventoScalarRelationFilter, EventoWhereInput>
-  }, "id" | "correo" | "participante_unico_dni_por_evento" | "participante_unico_entrada_por_evento">
+  }, "id" | "participante_unico_dni_por_evento" | "participante_unico_entrada_por_evento">
 
   export type ParticipanteOrderByWithAggregationInput = {
     id?: SortOrder
